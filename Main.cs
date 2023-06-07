@@ -17,7 +17,7 @@ namespace DamageCap
     {
         private const string ModId = "tk.scyye.rounds.DamageCap";
         private const string ModName = "Damage Cap";
-        private const string Version = "1.0.0";
+        private const string Version = "1.1.0";
 
         private ConfigEntry<int> MaxDamageConfig;
         public int MaxDamage;
@@ -60,25 +60,13 @@ namespace DamageCap
         }
     }
 
-    [HarmonyPatch(typeof(Gun))]
+    [HarmonyPatch(typeof(HealthHandler))]
+    [HarmonyPatch(nameof(HealthHandler.DoDamage))]
     class DamageCapPatch
     {
-        [HarmonyPrefix]
-        [HarmonyPatch(nameof(Gun.Attack))]
-        [HarmonyPriority(Priority.First)]
-        static void LimitDamage(Gun __instance)
+        static void Prefix(ref UnityEngine.Vector2 damage)
         {
-            if (__instance == null) return;
-
-            // TODO: See if the following line works properly
-            //gun.damage = Math.Min(gun.damage, Main.MaxDamage / 55);
-
-
-
-            if (__instance.damage > Main.instance.MaxDamage / 55)
-            {
-                __instance.damage = Main.instance.MaxDamage / 55;
-            }
+            damage = UnityEngine.Vector2.ClampMagnitude(damage, Main.instance.MaxDamage);
         }
     }
 }
